@@ -3,11 +3,13 @@
 	"version": "0.1.0",
 	"private": true,
 	"scripts": {
+		"test": "",
+		"test:watch": "",
 		"dev": "next dev",
 		"build": "next build",
 		"start": "next start",
 		"lint": "next lint",
-		"ci": "lint"
+		"ci": "pnpm lint && pnpm test"
 	},
 	"dependencies": {
 		"@types/node": "18.14.6",
