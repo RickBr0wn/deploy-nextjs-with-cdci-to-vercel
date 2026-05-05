@@ -1,6 +1,6 @@
 # Deploy Next.js with CI/CD to Vercel
 
-A reference implementation for deploying a Next.js application to Vercel using GitHub Actions — with separate pipelines for preview and production environments.
+A reference implementation for deploying a Next.js application to Vercel using GitHub Actions, with separate pipelines for preview and production environments.
 
 ## What this demonstrates
 
@@ -45,7 +45,7 @@ In `vercel.json`:
 }
 ```
 
-This prevents Vercel from auto-deploying on push — GitHub Actions takes over.
+This prevents Vercel from auto-deploying on push, GitHub Actions takes over.
 
 ### 3. Add GitHub secrets
 
