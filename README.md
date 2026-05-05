@@ -1,38 +1,79 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Deploy Next.js with CI/CD to Vercel
 
-## Getting Started
+A reference implementation for deploying a Next.js application to Vercel using GitHub Actions — with separate pipelines for preview and production environments.
 
-First, run the development server:
+## What this demonstrates
+
+Vercel's native GitHub integration auto-deploys on every push, but that bypasses your CI pipeline (linting, tests, type checks). This repo shows how to **own the deployment** by disabling the native integration and driving everything through GitHub Actions using the Vercel CLI.
+
+### The pattern
+
+| Branch | Trigger | Environment |
+|---|---|---|
+| Any non-`main` branch | `push` | Preview |
+| `main` | `push` | Production |
+
+Each workflow:
+1. Runs CI (`pnpm ci` — lint, tests, etc.)
+2. Pulls environment variables from Vercel (`vercel pull`)
+3. Builds using Vercel's build system (`vercel build`)
+4. Deploys the pre-built output (`vercel deploy --prebuilt`)
+
+Building with `vercel build` ensures the output matches exactly what Vercel would produce natively, while GitHub Actions controls when and whether the deploy happens.
+
+## Setup
+
+### 1. Link the project to Vercel
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
+pnpm add -g vercel
+vercel link
+```
+
+This creates `.vercel/project.json` containing your `orgId` and `projectId`.
+
+### 2. Disable Vercel's automatic GitHub integration
+
+In `vercel.json`:
+
+```json
+{
+  "version": 2,
+  "github": {
+    "enabled": false
+  }
+}
+```
+
+This prevents Vercel from auto-deploying on push — GitHub Actions takes over.
+
+### 3. Add GitHub secrets
+
+Go to **GitHub → repo → Settings → Secrets and variables → Actions** and add:
+
+| Secret | Where to find it |
+|---|---|
+| `VERCEL_SECRET` | Vercel dashboard → Settings → Tokens |
+| `VERCEL_ORG_ID` | `.vercel/project.json` → `orgId` |
+| `VERCEL_PROJECT_ID` | `.vercel/project.json` → `projectId` |
+
+### 4. Push a branch
+
+Push any non-`main` branch to trigger a preview deploy. Merge to `main` to trigger production.
+
+## Local development
+
+```bash
+pnpm install
 pnpm dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `pages/index.tsx`. The page auto-updates as you edit the file.
+## Stack
 
-[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.ts`.
-
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
-
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+- [Next.js 15](https://nextjs.org) (App Router)
+- [React 19](https://react.dev)
+- [TypeScript 5](https://typescriptlang.org)
+- [Vercel CLI](https://vercel.com/docs/cli)
+- [GitHub Actions](https://docs.github.com/en/actions)
